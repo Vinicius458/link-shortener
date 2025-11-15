@@ -1,13 +1,13 @@
 import {
   SearchParams,
   SearchResult,
-} from '../../searchable-repository-contracts'
+} from '../../searchable-repository-contracts';
 
 describe('Searchable Repository unit tests', () => {
   describe('SearchParams tests', () => {
     it('page prop', () => {
-      const sut = new SearchParams()
-      expect(sut.page).toEqual(1)
+      const sut = new SearchParams();
+      expect(sut.page).toEqual(1);
 
       const params = [
         { page: null as any, expected: 1 },
@@ -22,16 +22,16 @@ describe('Searchable Repository unit tests', () => {
         { page: {}, expected: 1 },
         { page: 1, expected: 1 },
         { page: 2, expected: 2 },
-      ]
+      ];
 
       params.forEach(i => {
-        expect(new SearchParams({ page: i.page }).page).toBe(i.expected)
-      })
-    })
+        expect(new SearchParams({ page: i.page }).page).toBe(i.expected);
+      });
+    });
 
     it('perPage prop', () => {
-      const sut = new SearchParams()
-      expect(sut.perPage).toEqual(15)
+      const sut = new SearchParams();
+      expect(sut.perPage).toEqual(15);
 
       const params = [
         { perPage: null as any, expected: 15 },
@@ -47,18 +47,18 @@ describe('Searchable Repository unit tests', () => {
         { perPage: 1, expected: 1 },
         { perPage: 2, expected: 2 },
         { perPage: 25, expected: 25 },
-      ]
+      ];
 
       params.forEach(i => {
         expect(new SearchParams({ perPage: i.perPage }).perPage).toBe(
           i.expected,
-        )
-      })
-    })
+        );
+      });
+    });
 
     it('sort prop', () => {
-      const sut = new SearchParams()
-      expect(sut.sort).toBeNull()
+      const sut = new SearchParams();
+      expect(sut.sort).toBeNull();
 
       const params = [
         { sort: null as any, expected: null },
@@ -74,25 +74,25 @@ describe('Searchable Repository unit tests', () => {
         { sort: 1, expected: '1' },
         { sort: 2, expected: '2' },
         { sort: 25, expected: '25' },
-      ]
+      ];
 
       params.forEach(i => {
-        expect(new SearchParams({ sort: i.sort }).sort).toBe(i.expected)
-      })
-    })
+        expect(new SearchParams({ sort: i.sort }).sort).toBe(i.expected);
+      });
+    });
 
     it('sortDir prop', () => {
-      let sut = new SearchParams()
-      expect(sut.sortDir).toBeNull()
+      let sut = new SearchParams();
+      expect(sut.sortDir).toBeNull();
 
-      sut = new SearchParams({ sort: null })
-      expect(sut.sortDir).toBeNull()
+      sut = new SearchParams({ sort: null });
+      expect(sut.sortDir).toBeNull();
 
-      sut = new SearchParams({ sort: undefined })
-      expect(sut.sortDir).toBeNull()
+      sut = new SearchParams({ sort: undefined });
+      expect(sut.sortDir).toBeNull();
 
-      sut = new SearchParams({ sort: '' })
-      expect(sut.sortDir).toBeNull()
+      sut = new SearchParams({ sort: '' });
+      expect(sut.sortDir).toBeNull();
 
       const params = [
         { sortDir: null as any, expected: 'desc' },
@@ -104,18 +104,18 @@ describe('Searchable Repository unit tests', () => {
         { sortDir: 'desc', expected: 'desc' },
         { sortDir: 'ASC', expected: 'asc' },
         { sortDir: 'DESC', expected: 'desc' },
-      ]
+      ];
 
       params.forEach(i => {
         expect(
           new SearchParams({ sort: 'field', sortDir: i.sortDir }).sortDir,
-        ).toBe(i.expected)
-      })
-    })
+        ).toBe(i.expected);
+      });
+    });
 
     it('filter prop', () => {
-      const sut = new SearchParams()
-      expect(sut.filter).toBeNull()
+      const sut = new SearchParams();
+      expect(sut.filter).toBeNull();
 
       const params = [
         { filter: null as any, expected: null },
@@ -131,13 +131,13 @@ describe('Searchable Repository unit tests', () => {
         { filter: 1, expected: '1' },
         { filter: 2, expected: '2' },
         { filter: 25, expected: '25' },
-      ]
+      ];
 
       params.forEach(i => {
-        expect(new SearchParams({ filter: i.filter }).filter).toBe(i.expected)
-      })
-    })
-  })
+        expect(new SearchParams({ filter: i.filter }).filter).toBe(i.expected);
+      });
+    });
+  });
 
   describe('SearchResult tests', () => {
     it('constructor props', () => {
@@ -149,7 +149,7 @@ describe('Searchable Repository unit tests', () => {
         sort: null,
         sortDir: null,
         filter: null,
-      })
+      });
       expect(sut.toJSON()).toStrictEqual({
         items: ['test1', 'test2', 'test3', 'test4'] as any,
         total: 4,
@@ -159,7 +159,7 @@ describe('Searchable Repository unit tests', () => {
         sort: null,
         sortDir: null,
         filter: null,
-      })
+      });
 
       sut = new SearchResult({
         items: ['test1', 'test2', 'test3', 'test4'] as any,
@@ -169,7 +169,7 @@ describe('Searchable Repository unit tests', () => {
         sort: 'name',
         sortDir: 'asc',
         filter: 'test',
-      })
+      });
       expect(sut.toJSON()).toStrictEqual({
         items: ['test1', 'test2', 'test3', 'test4'] as any,
         total: 4,
@@ -179,7 +179,7 @@ describe('Searchable Repository unit tests', () => {
         sort: 'name',
         sortDir: 'asc',
         filter: 'test',
-      })
+      });
 
       sut = new SearchResult({
         items: ['test1', 'test2', 'test3', 'test4'] as any,
@@ -189,8 +189,8 @@ describe('Searchable Repository unit tests', () => {
         sort: 'name',
         sortDir: 'asc',
         filter: 'test',
-      })
-      expect(sut.lastPage).toBe(1)
+      });
+      expect(sut.lastPage).toBe(1);
 
       sut = new SearchResult({
         items: ['test1', 'test2', 'test3', 'test4'] as any,
@@ -200,8 +200,8 @@ describe('Searchable Repository unit tests', () => {
         sort: 'name',
         sortDir: 'asc',
         filter: 'test',
-      })
-      expect(sut.lastPage).toBe(6)
-    })
-  })
-})
+      });
+      expect(sut.lastPage).toBe(6);
+    });
+  });
+});

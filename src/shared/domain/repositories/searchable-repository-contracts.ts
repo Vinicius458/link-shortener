@@ -55,8 +55,11 @@ export class SearchParams<Filter = string> {
   }
 
   private set perPage(value: number | undefined) {
+    if (typeof value === 'boolean') {
+      this._perPage = 15;
+      return;
+    }
     let parsed = Number(value);
-
     if (Number.isNaN(parsed) || parsed <= 0 || !Number.isInteger(parsed)) {
       parsed = 15;
     }
@@ -68,12 +71,9 @@ export class SearchParams<Filter = string> {
     return this._sort;
   }
 
-  private set sort(value: string | null | undefined) {
-    if (!value || value === '') {
-      this._sort = null;
-      return;
-    }
-    this._sort = String(value);
+  private set sort(value: string | null) {
+    this._sort =
+      value === null || value === undefined || value === '' ? null : `${value}`;
   }
 
   get sortDir() {
@@ -99,12 +99,10 @@ export class SearchParams<Filter = string> {
   }
 
   private set filter(value: Filter | null | undefined) {
-    if (value === null || value === undefined || value === '') {
-      this._filter = null;
-      return;
-    }
-
-    this._filter = value as Filter;
+    this._filter =
+      value === null || value === undefined || value === ''
+        ? null
+        : (`${value}` as any);
   }
 }
 
