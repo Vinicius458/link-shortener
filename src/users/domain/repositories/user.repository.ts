@@ -1,12 +1,12 @@
-import { UserEntity } from '../entities/user.entity'
+import { UserEntity } from '../entities/user.entity';
 import {
   SearchParams as DefaultSearchParams,
   SearchResult as DefaultSearchResult,
   SearchableRepositoryInterface,
-} from '@/shared/domain/repositories/searchable-repository-contracts'
+} from '@/shared/domain/repositories/searchable-repository-contracts';
 
 export namespace UserRepository {
-  export type Filter = string
+  export type Filter = string;
 
   export class SearchParams extends DefaultSearchParams<Filter> {}
 
@@ -19,7 +19,7 @@ export namespace UserRepository {
       SearchParams,
       SearchResult
     > {
-    findByEmail(email: string): Promise<UserEntity>
-    emailExists(email: string): Promise<void>
+    findByEmail(email: string): Promise<UserEntity>;
+    emailExists(email: string): Promise<void>;
   }
 }
