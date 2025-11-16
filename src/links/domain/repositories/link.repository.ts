@@ -22,9 +22,9 @@ export namespace LinkRepository {
     insert(entity: LinkEntity): Promise<void>;
     update(entity: LinkEntity): Promise<void>;
     findById(id: string): Promise<LinkEntity>;
+    findByAlias(alias: string): Promise<LinkEntity>;
     findByShortCode(shortCode: string): Promise<LinkEntity>;
     existsShortCode(shortCode: string): Promise<boolean>;
-    incrementClicks(id: string): Promise<void>;
     findAllByOwner(ownerId: string): Promise<LinkEntity[]>;
     findAll(): Promise<LinkEntity[]>;
     delete(id: string): Promise<void>;

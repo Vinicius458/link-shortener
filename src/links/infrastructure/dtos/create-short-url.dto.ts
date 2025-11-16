@@ -1,4 +1,4 @@
-import { CreateShortUrlUseCase } from '@/links/application/usecases/create-short-url.usecase';
+import { CreateShortUrlUseCase } from '@/links/application/usecases/shorten-url.usecase';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 

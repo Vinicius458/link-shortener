@@ -3,11 +3,11 @@ import { BadRequestError } from '@/shared/application/errors/bad-request-error';
 import { InternalServerError } from '@/shared/application/errors/internal-server-error';
 import { IdProvider } from '@/shared/application/providers/id-provider';
 import { UseCase as DefaultUseCase } from '@/shared/application/usecases/use-case';
-import { LinkOutput } from '../dtos/link-output';
+import { LinkOutput, LinkOutputMapper } from '../dtos/link-output';
 import { LinkRepository } from '@/links/domain/repositories/link.repository';
 import { UserRepository } from '@/users/domain/repositories/user.repository';
 
-export namespace CreateShortUrlUseCase {
+export namespace ShortenUrlUseCase {
   export type Input = {
     url: string;
     ownerId?: string | null;
@@ -19,7 +19,6 @@ export namespace CreateShortUrlUseCase {
     constructor(
       private linkRepo: LinkRepository.Repository,
       private userRepo: UserRepository.Repository,
-      private domain: string,
       private idProvider: IdProvider,
     ) {}
 
@@ -48,7 +47,7 @@ export namespace CreateShortUrlUseCase {
         ownerId: input.ownerId ?? null,
       });
       await this.linkRepo.insert(link);
-      return link;
+      return LinkOutputMapper.toOutput(link);
     }
   }
 }

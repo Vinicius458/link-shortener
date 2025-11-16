@@ -39,6 +39,14 @@ describe('LinkPrismaRepository integration tests', () => {
 
     expect(output.toJSON()).toStrictEqual(entity.toJSON());
   });
+  it('should find a entity by id', async () => {
+    const entity = new LinkEntity(LinkDataBuilder({}));
+    await prismaService.link.create({ data: entity.toJSON() });
+
+    const output = await sut.findByAlias(entity.shortCode);
+
+    expect(output.toJSON()).toStrictEqual(entity.toJSON());
+  });
 
   it('should insert a new entity', async () => {
     const entity = new LinkEntity(LinkDataBuilder({}));
@@ -123,19 +131,6 @@ describe('LinkPrismaRepository integration tests', () => {
 
     expect(await sut.existsShortCode('exists1')).toBe(true);
     expect(await sut.existsShortCode('nope')).toBe(false);
-  });
-
-  it('should increment clicks', async () => {
-    const entity = new LinkEntity(LinkDataBuilder({ clicks: 0 }));
-    await prismaService.link.create({ data: entity.toJSON() });
-
-    await sut.incrementClicks(entity._id);
-
-    const after = await prismaService.link.findUnique({
-      where: { id: entity._id },
-    });
-
-    expect(after.clicks).toBe(1);
   });
 
   it('should find all links by ownerId', async () => {

@@ -74,6 +74,14 @@ export class LinkPrismaRepository implements LinkRepository.Repository {
     return this._get(id);
   }
 
+  async findByAlias(alias: string): Promise<LinkEntity> {
+    const model = await this.prismaService.link.findFirst({
+      where: { shortCode: alias, deletedAt: null },
+    });
+
+    return LinkModelMapper.toEntity(model);
+  }
+
   async findAll(): Promise<LinkEntity[]> {
     const models = await this.prismaService.link.findMany({
       where: { deletedAt: null },
@@ -97,15 +105,6 @@ export class LinkPrismaRepository implements LinkRepository.Repository {
     await this.prismaService.link.update({
       where: { id },
       data: { deletedAt: new Date() },
-    });
-  }
-
-  async incrementClicks(id: string): Promise<void> {
-    await this._get(id);
-
-    await this.prismaService.link.update({
-      where: { id },
-      data: { clicks: { increment: 1 } },
     });
   }
 
