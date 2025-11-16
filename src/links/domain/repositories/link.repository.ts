@@ -19,13 +19,14 @@ export namespace LinkRepository {
       SearchParams,
       SearchResult
     > {
-    create(link: LinkEntity): Promise<void>;
-    findByShortCode(shortCode: string): Promise<LinkEntity | null>;
-    findById(id: string): Promise<LinkEntity | null>;
+    insert(entity: LinkEntity): Promise<void>;
+    update(entity: LinkEntity): Promise<void>;
+    findById(id: string): Promise<LinkEntity>;
+    findByShortCode(shortCode: string): Promise<LinkEntity>;
+    existsShortCode(shortCode: string): Promise<boolean>;
     incrementClicks(id: string): Promise<void>;
     findAllByOwner(ownerId: string): Promise<LinkEntity[]>;
-    update(link: LinkEntity): Promise<void>;
-    softDelete(id: string): Promise<void>;
-    existsShortCode(shortCode: string): Promise<boolean>;
+    findAll(): Promise<LinkEntity[]>;
+    delete(id: string): Promise<void>;
   }
 }
