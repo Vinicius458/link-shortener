@@ -1,4 +1,3 @@
-import { CollectionPresenter } from '@/shared/infrastructure/presenters/collection.presenter';
 import { UserOutput } from '@/users/application/dtos/user-output';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';

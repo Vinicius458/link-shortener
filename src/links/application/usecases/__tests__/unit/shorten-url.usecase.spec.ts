@@ -42,7 +42,7 @@ describe('ShortenUrlUseCase unit tests', () => {
 
   it('Should validate ownerId and succeed if user exists', async () => {
     const userEntity = new UserEntity(UserDataBuilder({ email: 'a@a.com' }));
-    userRepo.items = [userEntity];
+    userRepo.insert(userEntity);
 
     jest.spyOn(userRepo, 'findById').mockResolvedValue(userEntity);
 

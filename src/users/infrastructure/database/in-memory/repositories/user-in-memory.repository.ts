@@ -2,14 +2,10 @@ import { UserRepository } from '@/users/domain/repositories/user.repository';
 import { UserEntity } from '@/users/domain/entities/user.entity';
 import { NotFoundError } from '@/shared/domain/errors/not-found-error';
 import { ConflictError } from '@/shared/domain/errors/conflict-error';
-import { InMemorySearchableRepository } from '@/shared/domain/repositories/in-memory-searchable.repository';
-import { SortDirection } from '@/shared/domain/repositories/searchable-repository-contracts';
 
-export class UserInMemoryRepository
-  extends InMemorySearchableRepository<UserEntity>
-  implements UserRepository.Repository
-{
+export class UserInMemoryRepository implements UserRepository.Repository {
   sortableFields: string[] = ['name', 'createdAt'];
+  public items: UserEntity[] = [];
 
   async findByEmail(email: string): Promise<UserEntity> {
     const entity = this.items.find(item => item.email === email);
@@ -29,26 +25,31 @@ export class UserInMemoryRepository
   async insert(entity: UserEntity): Promise<void> {
     this.items.push(entity);
   }
-
-  protected async applyFilter(
-    items: UserEntity[],
-    filter: UserRepository.Filter,
-  ): Promise<UserEntity[]> {
-    if (!filter) {
-      return items;
+  async findById(id: string): Promise<UserEntity> {
+    const entity = this.items.find(item => item.id === id);
+    if (!entity) {
+      throw new NotFoundError(`Entity not found using id ${id}`);
     }
-    return items.filter(item => {
-      return item.props.name.toLowerCase().includes(filter.toLowerCase());
-    });
+    return entity;
   }
 
-  protected async applySort(
-    items: UserEntity[],
-    sort: string | null,
-    sortDir: SortDirection | null,
-  ): Promise<UserEntity[]> {
-    return !sort
-      ? super.applySort(items, 'createdAt', 'desc')
-      : super.applySort(items, sort, sortDir);
+  async update(entity: UserEntity): Promise<void> {
+    const index = this.items.findIndex(item => item.id === entity.id);
+    if (index === -1) {
+      throw new NotFoundError(`Entity not found using id ${entity.id}`);
+    }
+    this.items[index] = entity;
+  }
+  findAll(): Promise<UserEntity[]> {
+    return Promise.resolve(this.items);
+  }
+
+  delete(id: string): Promise<void> {
+    const index = this.items.findIndex(item => item.id === id);
+    if (index === -1) {
+      throw new NotFoundError(`Entity not found using id ${id}`);
+    }
+    this.items.splice(index, 1);
+    return Promise.resolve();
   }
 }

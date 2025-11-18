@@ -1,22 +1,22 @@
-import { UserInMemoryRepository } from '@/users/infrastructure/database/in-memory/repositories/user-in-memory.repository'
-import { NotFoundError } from '@/shared/domain/errors/not-found-error'
-import { UserEntity } from '@/users/domain/entities/user.entity'
-import { UserDataBuilder } from '@/users/domain/testing/helpers/user-data-builder'
-import { UpdatePasswordUseCase } from '../../update-password.usecase'
-import { HashProvider } from '@/shared/application/providers/hash-provider'
-import { BcryptjsHashProvider } from '@/users/infrastructure/providers/hash-provider/bcryptjs-hash.provider'
-import { InvalidPasswordError } from '@/shared/application/errors/invalid-password-error'
+import { UserInMemoryRepository } from '@/users/infrastructure/database/in-memory/repositories/user-in-memory.repository';
+import { NotFoundError } from '@/shared/domain/errors/not-found-error';
+import { UserEntity } from '@/users/domain/entities/user.entity';
+import { UserDataBuilder } from '@/users/domain/testing/helpers/user-data-builder';
+import { UpdatePasswordUseCase } from '../../update-password.usecase';
+import { HashProvider } from '@/shared/application/providers/hash-provider';
+import { BcryptjsHashProvider } from '@/users/infrastructure/providers/hash-provider/bcryptjs-hash.provider';
+import { InvalidPasswordError } from '@/shared/application/errors/invalid-password-error';
 
 describe('UpdatePasswordUseCase unit tests', () => {
-  let sut: UpdatePasswordUseCase.UseCase
-  let repository: UserInMemoryRepository
-  let hashProvider: HashProvider
+  let sut: UpdatePasswordUseCase.UseCase;
+  let repository: UserInMemoryRepository;
+  let hashProvider: HashProvider;
 
   beforeEach(() => {
-    repository = new UserInMemoryRepository()
-    hashProvider = new BcryptjsHashProvider()
-    sut = new UpdatePasswordUseCase.UseCase(repository, hashProvider)
-  })
+    repository = new UserInMemoryRepository();
+    hashProvider = new BcryptjsHashProvider();
+    sut = new UpdatePasswordUseCase.UseCase(repository, hashProvider);
+  });
 
   it('Should throws error when entity not found', async () => {
     await expect(() =>
@@ -25,12 +25,12 @@ describe('UpdatePasswordUseCase unit tests', () => {
         password: 'test password',
         oldPassword: 'old password',
       }),
-    ).rejects.toThrow(new NotFoundError('Entity not found'))
-  })
+    ).rejects.toThrow(new NotFoundError('Entity not found using id fakeId'));
+  });
 
   it('Should throws error when old password not provided', async () => {
-    const entity = new UserEntity(UserDataBuilder({}))
-    repository.items = [entity]
+    const entity = new UserEntity(UserDataBuilder({}));
+    repository.insert(entity);
     await expect(() =>
       sut.execute({
         id: entity._id,
@@ -39,12 +39,12 @@ describe('UpdatePasswordUseCase unit tests', () => {
       }),
     ).rejects.toThrow(
       new InvalidPasswordError('Old password and new password is required'),
-    )
-  })
+    );
+  });
 
   it('Should throws error when new password not provided', async () => {
-    const entity = new UserEntity(UserDataBuilder({ password: '1234' }))
-    repository.items = [entity]
+    const entity = new UserEntity(UserDataBuilder({ password: '1234' }));
+    repository.insert(entity);
     await expect(() =>
       sut.execute({
         id: entity._id,
@@ -53,39 +53,39 @@ describe('UpdatePasswordUseCase unit tests', () => {
       }),
     ).rejects.toThrow(
       new InvalidPasswordError('Old password and new password is required'),
-    )
-  })
+    );
+  });
 
   it('Should throws error when new old password does not match', async () => {
-    const hashPassword = await hashProvider.generateHash('1234')
-    const entity = new UserEntity(UserDataBuilder({ password: hashPassword }))
-    repository.items = [entity]
+    const hashPassword = await hashProvider.generateHash('1234');
+    const entity = new UserEntity(UserDataBuilder({ password: hashPassword }));
+    repository.insert(entity);
     await expect(() =>
       sut.execute({
         id: entity._id,
         password: '4567',
         oldPassword: '123456',
       }),
-    ).rejects.toThrow(new InvalidPasswordError('Old password does not match'))
-  })
+    ).rejects.toThrow(new InvalidPasswordError('Old password does not match'));
+  });
 
   it('Should update a password', async () => {
-    const hashPassword = await hashProvider.generateHash('1234')
-    const spyUpdate = jest.spyOn(repository, 'update')
-    const items = [new UserEntity(UserDataBuilder({ password: hashPassword }))]
-    repository.items = items
+    const hashPassword = await hashProvider.generateHash('1234');
+    const spyUpdate = jest.spyOn(repository, 'update');
+    const entity = new UserEntity(UserDataBuilder({ password: hashPassword }));
+    repository.insert(entity);
 
     const result = await sut.execute({
-      id: items[0]._id,
+      id: entity._id,
       password: '4567',
       oldPassword: '1234',
-    })
+    });
 
     const checkNewPassword = await hashProvider.compareHash(
       '4567',
       result.password,
-    )
-    expect(spyUpdate).toHaveBeenCalledTimes(1)
-    expect(checkNewPassword).toBeTruthy()
-  })
-})
+    );
+    expect(spyUpdate).toHaveBeenCalledTimes(1);
+    expect(checkNewPassword).toBeTruthy();
+  });
+});

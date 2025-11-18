@@ -1,6 +1,4 @@
 import { NotFoundError } from '@/shared/domain/errors/not-found-error';
-import { InMemorySearchableRepository } from '@/shared/domain/repositories/in-memory-searchable.repository';
-import { SortDirection } from '@/shared/domain/repositories/searchable-repository-contracts';
 import { LinkEntity } from '@/links/domain/entities/link.entity';
 import { LinkRepository } from '@/links/domain/repositories/link.repository';
 
