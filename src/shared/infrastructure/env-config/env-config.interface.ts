@@ -3,4 +3,5 @@ export interface EnvConfig {
   getNodeEnv(): string;
   getJwtSecret(): string;
   getJwtExpiresInSeconds(): number;
+  getDatabaseUrl(): string;
 }

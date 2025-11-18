@@ -10,7 +10,9 @@ import { UserPrismaRepository } from '@/users/infrastructure/database/prisma/rep
 
 import { UserEntity } from '@/users/domain/entities/user.entity';
 import { UserDataBuilder } from '@/users/domain/testing/helpers/user-data-builder';
-import { BadRequestError } from '@/shared/application/errors/bad-request-error';
+import { NotFoundError } from '@/shared/domain/errors/not-found-error';
+import { LinkEntity } from '@/links/domain/entities/link.entity';
+import { LinkDataBuilder } from '@/links/domain/testing/helpers/link-data-builder';
 
 describe('CreateShortUrlUseCase integration tests', () => {
   const prismaService = new PrismaClient();
@@ -59,7 +61,7 @@ describe('CreateShortUrlUseCase integration tests', () => {
         url: 'https://google.com',
         ownerId: 'non-existing-id',
       }),
-    ).rejects.toBeInstanceOf(BadRequestError);
+    ).rejects.toBeInstanceOf(NotFoundError);
   });
 
   it('should create a short url WITHOUT ownerId', async () => {
@@ -108,14 +110,15 @@ describe('CreateShortUrlUseCase integration tests', () => {
       .mockReturnValueOnce('dup1')
       .mockReturnValueOnce('unique');
 
-    await prismaService.link.create({
-      data: {
-        id: 'id-1',
+    const link = new LinkEntity({
+      ...LinkDataBuilder({
         shortCode: 'dup1',
         originalUrl: 'https://github.com',
-        ownerId: null,
-      },
+      }),
+      ownerId: null,
     });
+
+    await prismaService.link.create({ data: link.toJSON() });
 
     const output = await sut.execute({
       url: 'https://google.com',

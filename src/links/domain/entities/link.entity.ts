@@ -87,4 +87,17 @@ export class LinkEntity extends Entity<LinkProps> {
       throw new EntityValidationError(validator.errors);
     }
   }
+
+  public toJSON() {
+    return {
+      id: this._id,
+      originalUrl: this.originalUrl,
+      shortCode: this.shortCode,
+      ownerId: this.ownerId,
+      clicks: this.clicks,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      deletedAt: this.deletedAt,
+    };
+  }
 }

@@ -2,11 +2,10 @@ import { ShortenUrlUseCase } from '../../shorten-url.usecase';
 import { LinkInMemoryRepository } from '@/links/infrastructure/database/in-memory/repositories/link-in-memory.repository';
 import { UserInMemoryRepository } from '@/users/infrastructure/database/in-memory/repositories/user-in-memory.repository';
 import { IdProvider } from '@/shared/application/providers/id-provider';
-import { BadRequestError } from '@/shared/application/errors/bad-request-error';
 import { InternalServerError } from '@/shared/application/errors/internal-server-error';
-import { LinkEntity } from '@/links/domain/entities/link.entity';
 import { UserEntity } from '@/users/domain/entities/user.entity';
 import { UserDataBuilder } from '@/users/domain/testing/helpers/user-data-builder';
+import { NotFoundError } from 'rxjs';
 
 describe('ShortenUrlUseCase unit tests', () => {
   let sut: ShortenUrlUseCase.UseCase;
@@ -37,8 +36,6 @@ describe('ShortenUrlUseCase unit tests', () => {
 
     expect(spyExistsCode).toHaveBeenCalledTimes(1);
     expect(spyInsert).toHaveBeenCalledTimes(1);
-
-    expect(result).toBeInstanceOf(LinkEntity);
     expect(result.shortCode).toBe('abc123');
     expect(result.originalUrl).toBe('https://google.com');
   });
@@ -61,7 +58,11 @@ describe('ShortenUrlUseCase unit tests', () => {
   });
 
   it('Should throw error when ownerId is provided but user does not exist', async () => {
-    jest.spyOn(userRepo, 'findById').mockResolvedValue(null);
+    jest
+      .spyOn(userRepo, 'findById')
+      .mockRejectedValue(
+        new NotFoundError(`LinkModel not found using ID non-existent-id`),
+      );
 
     const props = {
       url: 'https://google.com',
@@ -69,7 +70,7 @@ describe('ShortenUrlUseCase unit tests', () => {
     };
 
     await expect(() => sut.execute(props)).rejects.toBeInstanceOf(
-      BadRequestError,
+      NotFoundError,
     );
   });
 

@@ -6,6 +6,11 @@ import { setupPrismaTests } from '@/shared/infrastructure/database/prisma/testin
 
 import { ListUserUrlsUseCase } from '../../list-user-urls.usecase';
 import { LinkPrismaRepository } from '@/links/infrastructure/database/prisma/repositories/link-prisma.repository';
+import { randomUUID as uuidv4 } from 'node:crypto';
+import { LinkDataBuilder } from '@/links/domain/testing/helpers/link-data-builder';
+import { LinkEntity } from '@/links/domain/entities/link.entity';
+import { UserDataBuilder } from '@/users/domain/testing/helpers/user-data-builder';
+import { UserEntity } from '@/users/domain/entities/user.entity';
 
 describe('ListUserUrlsUseCase Integration Tests', () => {
   const prisma = new PrismaClient();
@@ -33,77 +38,88 @@ describe('ListUserUrlsUseCase Integration Tests', () => {
   });
 
   it('should return an empty list when user has no URLs', async () => {
-    const output = await sut.execute({ userId: 'user1' });
+    const output = await sut.execute({ userId: uuidv4() });
 
     expect(output.items).toHaveLength(0);
   });
 
   it('should return only URLs belonging to the specified user', async () => {
+    const user1 = new UserEntity(UserDataBuilder({}));
+    const user2 = new UserEntity(UserDataBuilder({}));
+    await prisma.user.createMany({
+      data: [user1.toJSON(), user2.toJSON()],
+    });
+    const entity1 = new LinkEntity(
+      LinkDataBuilder({
+        shortCode: 'short1',
+        originalUrl: 'https://active1.com',
+        ownerId: user1.id,
+        clicks: 0,
+        deletedAt: null,
+      }),
+    );
+    const entity2 = new LinkEntity(
+      LinkDataBuilder({
+        shortCode: 'short2',
+        originalUrl: 'https://active2.com',
+        ownerId: user1.id,
+        clicks: 3,
+        deletedAt: null,
+      }),
+    );
+    const entity3 = new LinkEntity(
+      LinkDataBuilder({
+        shortCode: 'short3',
+        originalUrl: 'https://active3.com',
+        ownerId: user2.id,
+        clicks: 2,
+        deletedAt: null,
+      }),
+    );
     await prisma.link.createMany({
-      data: [
-        {
-          id: 'l1',
-          shortCode: 'u1-a',
-          originalUrl: 'https://site1.com',
-          ownerId: 'user1',
-          clicks: 0,
-          deletedAt: null,
-        },
-        {
-          id: 'l2',
-          shortCode: 'u1-b',
-          originalUrl: 'https://site2.com',
-          ownerId: 'user1',
-          clicks: 3,
-          deletedAt: null,
-        },
-        {
-          id: 'l3',
-          shortCode: 'u2-a',
-          originalUrl: 'https://othersite.com',
-          ownerId: 'user2',
-          clicks: 2,
-          deletedAt: null,
-        },
-      ],
+      data: [entity1.toJSON(), entity2.toJSON(), entity3.toJSON()],
     });
 
-    const output = await sut.execute({ userId: 'user1' });
-
+    const output = await sut.execute({ userId: user1.id });
     expect(output.items).toHaveLength(2);
 
     const shortCodes = output.items.map(i => i.shortCode);
 
-    expect(shortCodes).toContain('u1-a');
-    expect(shortCodes).toContain('u1-b');
-    expect(shortCodes).not.toContain('u2-a');
+    expect(shortCodes).toContain('short1');
+    expect(shortCodes).toContain('short2');
+    expect(shortCodes).not.toContain('short3');
   });
 
   it('should not return soft-deleted URLs', async () => {
+    const user1 = new UserEntity(UserDataBuilder({}));
+    await prisma.user.createMany({
+      data: [user1.toJSON()],
+    });
+    const entity1 = new LinkEntity(
+      LinkDataBuilder({
+        shortCode: 'short1',
+        originalUrl: 'https://active.com',
+        ownerId: user1.id,
+        clicks: 0,
+        deletedAt: null,
+      }),
+    );
+    const entity2 = new LinkEntity(
+      LinkDataBuilder({
+        shortCode: 'short2',
+        originalUrl: 'https://active2.com',
+        ownerId: user1.id,
+        clicks: 0,
+        deletedAt: new Date(),
+      }),
+    );
     await prisma.link.createMany({
-      data: [
-        {
-          id: 'l1',
-          shortCode: 'active',
-          originalUrl: 'https://active.com',
-          ownerId: 'user1',
-          clicks: 0,
-          deletedAt: null,
-        },
-        {
-          id: 'l2',
-          shortCode: 'deleted',
-          originalUrl: 'https://deleted.com',
-          ownerId: 'user1',
-          clicks: 1,
-          deletedAt: new Date(),
-        },
-      ],
+      data: [entity1.toJSON(), entity2.toJSON()],
     });
 
-    const output = await sut.execute({ userId: 'user1' });
+    const output = await sut.execute({ userId: user1.id });
 
     expect(output.items).toHaveLength(1);
-    expect(output.items[0].shortCode).toBe('active');
+    expect(output.items[0].shortCode).toBe('short1');
   });
 });

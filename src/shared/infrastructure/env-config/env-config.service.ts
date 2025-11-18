@@ -13,6 +13,13 @@ export class EnvConfigService implements EnvConfig {
     return this.configService.get<string>('NODE_ENV', 'development');
   }
 
+  getDatabaseUrl(): string {
+    const url = this.configService.get<string>('DATABASE_URL');
+    if (!url) {
+      throw new Error('Missing environment variable: DATABASE_URL');
+    }
+    return url;
+  }
   getJwtSecret(): string {
     const secret = this.configService.get<string>('JWT_SECRET');
 

@@ -18,7 +18,7 @@ export class LinkRules {
 
   @IsString()
   @IsNotEmpty()
-  @Length(1, 20)
+  @Length(1, 6)
   shortCode: string;
 
   @IsOptional()

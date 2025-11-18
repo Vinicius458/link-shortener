@@ -30,40 +30,6 @@ export class LinkPrismaRepository implements LinkRepository.Repository {
     return !!link;
   }
 
-  async search(
-    props: LinkRepository.SearchParams,
-  ): Promise<LinkRepository.SearchResult> {
-    const sortable = this.sortableFields.includes(props.sort);
-    const orderByField = sortable ? props.sort : 'createdAt';
-    const orderByDir = sortable ? props.sortDir : 'desc';
-
-    const where: any = {
-      deletedAt: null,
-      ...(props.filter && {
-        originalUrl: { contains: props.filter, mode: 'insensitive' },
-      }),
-    };
-
-    const total = await this.prismaService.link.count({ where });
-
-    const models = await this.prismaService.link.findMany({
-      where,
-      orderBy: { [orderByField]: orderByDir },
-      skip: props.page > 0 ? (props.page - 1) * props.perPage : 0,
-      take: props.perPage,
-    });
-
-    return new LinkRepository.SearchResult({
-      items: models.map(LinkModelMapper.toEntity),
-      total,
-      currentPage: props.page,
-      perPage: props.perPage,
-      sort: orderByField,
-      sortDir: orderByDir,
-      filter: props.filter,
-    });
-  }
-
   async insert(entity: LinkEntity): Promise<void> {
     await this.prismaService.link.create({
       data: entity.toJSON(),
@@ -79,6 +45,26 @@ export class LinkPrismaRepository implements LinkRepository.Repository {
       where: { shortCode: alias, deletedAt: null },
     });
 
+    if (!model) {
+      return null;
+    }
+    return LinkModelMapper.toEntity(model);
+  }
+
+  async findByOriginalUrlAndOwnerId(
+    url: string,
+    ownerId: string | null,
+  ): Promise<LinkEntity | null> {
+    const model = await this.prismaService.link.findFirst({
+      where: {
+        originalUrl: url,
+        ownerId: ownerId,
+      },
+    });
+
+    if (!model) {
+      return null;
+    }
     return LinkModelMapper.toEntity(model);
   }
 
@@ -87,6 +73,9 @@ export class LinkPrismaRepository implements LinkRepository.Repository {
       where: { deletedAt: null },
     });
 
+    if (!models) {
+      return [];
+    }
     return models.map(model => LinkModelMapper.toEntity(model));
   }
 
@@ -113,6 +102,9 @@ export class LinkPrismaRepository implements LinkRepository.Repository {
       where: { ownerId, deletedAt: null },
     });
 
+    if (!models) {
+      return [];
+    }
     return models.map(model => LinkModelMapper.toEntity(model));
   }
 

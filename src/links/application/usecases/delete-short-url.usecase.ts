@@ -1,7 +1,7 @@
 import { LinkRepository } from '@/links/domain/repositories/link.repository';
-import { ForbiddenError } from '@/shared/application/errors/forbidden-error';
 import { NotFoundError } from '@/shared/application/errors/not-found-error';
 import { UseCase as DefaultUseCase } from '@/shared/application/usecases/use-case';
+import { ConflictException } from '@nestjs/common';
 
 export namespace DeleteShortUrlUseCase {
   export type Input = {
@@ -22,7 +22,7 @@ export namespace DeleteShortUrlUseCase {
       }
 
       if (entity.ownerId !== input.userId) {
-        throw new ForbiddenError(
+        throw new ConflictException(
           'You do not have permission to delete this short URL',
         );
       }

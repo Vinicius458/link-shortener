@@ -6,6 +6,8 @@ import { UseCase as DefaultUseCase } from '@/shared/application/usecases/use-cas
 import { LinkOutput, LinkOutputMapper } from '../dtos/link-output';
 import { LinkRepository } from '@/links/domain/repositories/link.repository';
 import { UserRepository } from '@/users/domain/repositories/user.repository';
+import { ConflictExceptionError } from '@/shared/application/errors/conflict-exception';
+import { ConflictException } from '@nestjs/common';
 
 export namespace ShortenUrlUseCase {
   export type Input = {
@@ -36,16 +38,22 @@ export namespace ShortenUrlUseCase {
       ownerId?: string | null;
     }): Promise<Output> {
       if (input.ownerId !== undefined && input.ownerId !== null) {
-        const exists = await this.userRepo.findById(input.ownerId);
-        if (!exists) throw new BadRequestError('Invalid User');
+        await this.userRepo.findById(input.ownerId);
+        const urlExists = await this.linkRepo.findByOriginalUrlAndOwnerId(
+          input.url,
+          input.ownerId,
+        );
+        if (urlExists) {
+          throw new ConflictException('URL already shortened');
+        }
       }
-
       const code = await this.generateUniqueCode();
       const link = new LinkEntity({
         originalUrl: input.url,
         shortCode: code,
         ownerId: input.ownerId ?? null,
       });
+
       await this.linkRepo.insert(link);
       return LinkOutputMapper.toOutput(link);
     }

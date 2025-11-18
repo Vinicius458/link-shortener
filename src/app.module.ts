@@ -3,8 +3,15 @@ import { EnvConfigModule } from './shared/infrastructure/env-config/env-config.m
 import { UsersModule } from './users/infrastructure/users.module';
 import { AuthModule } from './auth/infrastructure/auth.module';
 import { DatabaseModule } from './shared/infrastructure/database/database.module';
+import { LinksModule } from './links/infrastructure/links.module';
 
 @Module({
-  imports: [EnvConfigModule, UsersModule, DatabaseModule, AuthModule],
+  imports: [
+    EnvConfigModule,
+    UsersModule,
+    LinksModule,
+    DatabaseModule,
+    AuthModule,
+  ],
 })
 export class AppModule {}

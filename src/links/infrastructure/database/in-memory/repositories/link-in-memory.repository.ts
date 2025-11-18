@@ -4,11 +4,9 @@ import { SortDirection } from '@/shared/domain/repositories/searchable-repositor
 import { LinkEntity } from '@/links/domain/entities/link.entity';
 import { LinkRepository } from '@/links/domain/repositories/link.repository';
 
-export class LinkInMemoryRepository
-  extends InMemorySearchableRepository<LinkEntity>
-  implements LinkRepository.Repository
-{
+export class LinkInMemoryRepository implements LinkRepository.Repository {
   sortableFields: string[] = ['createdAt', 'clicks'];
+  public items: LinkEntity[] = [];
 
   async findByShortCode(shortCode: string): Promise<LinkEntity> {
     const entity = this.items.find(item => item.shortCode === shortCode);
@@ -20,31 +18,19 @@ export class LinkInMemoryRepository
     return entity;
   }
 
+  async findByOriginalUrlAndOwnerId(
+    url: string,
+    ownerId: string | null,
+  ): Promise<LinkEntity | null> {
+    const entity = this.items.find(
+      item => item.originalUrl === url && item.ownerId === ownerId,
+    );
+
+    return entity || null;
+  }
+
   async existsShortCode(shortCode: string): Promise<boolean> {
     return !!this.items.find(item => item.shortCode === shortCode);
-  }
-
-  protected async applyFilter(
-    items: LinkEntity[],
-    filter: LinkRepository.Filter,
-  ): Promise<LinkEntity[]> {
-    if (!filter) {
-      return items;
-    }
-
-    return items.filter(item =>
-      item.originalUrl.toLowerCase().includes(filter.toLowerCase()),
-    );
-  }
-
-  protected async applySort(
-    items: LinkEntity[],
-    sort: string | null,
-    sortDir: SortDirection | null,
-  ): Promise<LinkEntity[]> {
-    return !sort
-      ? super.applySort(items, 'createdAt', 'desc')
-      : super.applySort(items, sort, sortDir);
   }
 
   async insert(entity: LinkEntity): Promise<void> {

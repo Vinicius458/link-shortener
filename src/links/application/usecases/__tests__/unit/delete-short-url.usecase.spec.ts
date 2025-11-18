@@ -1,8 +1,8 @@
 import { LinkRepository } from '@/links/domain/repositories/link.repository';
 import { NotFoundError } from '@/shared/application/errors/not-found-error';
-import { ForbiddenError } from '@/shared/application/errors/forbidden-error';
 import { DeleteShortUrlUseCase } from '../../delete-short-url.usecase';
 import { LinkEntity } from '@/links/domain/entities/link.entity';
+import { ConflictException } from '@nestjs/common';
 
 describe('DeleteShortUrlUseCase Unit Tests', () => {
   let useCase: DeleteShortUrlUseCase.UseCase;
@@ -76,7 +76,9 @@ describe('DeleteShortUrlUseCase Unit Tests', () => {
     await expect(
       useCase.execute({ id: 'link-001', userId: 'other-user' }),
     ).rejects.toThrow(
-      new ForbiddenError('You do not have permission to delete this short URL'),
+      new ConflictException(
+        'You do not have permission to delete this short URL',
+      ),
     );
   });
 });

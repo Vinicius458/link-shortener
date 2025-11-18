@@ -3,6 +3,7 @@ import { LinkOutput, LinkOutputMapper } from '../dtos/link-output';
 import { UseCase as DefaultUseCase } from '@/shared/application/usecases/use-case';
 import { NotFoundError } from '@/shared/application/errors/not-found-error';
 import { ForbiddenError } from '@/shared/application/errors/forbidden-error';
+import { ConflictException } from '@nestjs/common';
 
 export namespace UpdateShortUrlDestinationUseCase {
   export type Input = {
@@ -25,7 +26,7 @@ export namespace UpdateShortUrlDestinationUseCase {
 
       // Garante que apenas o dono pode editar
       if (entity.ownerId !== input.userId) {
-        throw new ForbiddenError(
+        throw new ConflictException(
           'You do not have permission to update this short URL',
         );
       }

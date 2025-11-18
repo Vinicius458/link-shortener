@@ -1,9 +1,9 @@
 import { LinkRepository } from '@/links/domain/repositories/link.repository';
 import { NotFoundError } from '@/shared/application/errors/not-found-error';
-import { ForbiddenError } from '@/shared/application/errors/forbidden-error';
 import { UpdateShortUrlDestinationUseCase } from '../../update-short-url.usecase';
 import { LinkEntity } from '@/links/domain/entities/link.entity';
 import { LinkOutputMapper } from '@/links/application/dtos/link-output';
+import { ConflictException } from '@nestjs/common';
 
 describe('UpdateShortUrlDestinationUseCase', () => {
   let useCase: UpdateShortUrlDestinationUseCase.UseCase;
@@ -94,7 +94,9 @@ describe('UpdateShortUrlDestinationUseCase', () => {
         newOriginalUrl: 'https://new-url.com',
       }),
     ).rejects.toThrow(
-      new ForbiddenError('You do not have permission to update this short URL'),
+      new ConflictException(
+        'You do not have permission to update this short URL',
+      ),
     );
   });
 });

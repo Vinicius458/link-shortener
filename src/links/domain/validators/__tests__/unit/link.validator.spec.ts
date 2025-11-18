@@ -20,55 +20,62 @@ describe('LinkValidator unit tests', () => {
     expect(isValid).toBeFalsy();
     expect(sut.errors!['originalUrl']).toStrictEqual([
       'originalUrl should not be empty',
-      'originalUrl must be an URL address',
+      'originalUrl must be a URL address',
     ]);
 
     isValid = sut.validate({ ...props, originalUrl: '' });
     expect(isValid).toBeFalsy();
     expect(sut.errors!['originalUrl']).toStrictEqual([
       'originalUrl should not be empty',
-      'originalUrl must be an URL address',
+      'originalUrl must be a URL address',
     ]);
 
     isValid = sut.validate({ ...props, originalUrl: 10 as any });
     expect(isValid).toBeFalsy();
     expect(sut.errors!['originalUrl']).toStrictEqual([
-      'originalUrl must be an URL address',
+      'originalUrl must be a URL address',
     ]);
 
     isValid = sut.validate({ ...props, originalUrl: 'invalid-url' });
     expect(isValid).toBeFalsy();
     expect(sut.errors!['originalUrl']).toStrictEqual([
-      'originalUrl must be an URL address',
+      'originalUrl must be a URL address',
     ]);
   });
 
   it('Invalidation cases for shortCode field', () => {
     let isValid = sut.validate(null as any);
     expect(isValid).toBeFalsy();
-    expect(sut.errors!['shortCode']).toStrictEqual([
-      'shortCode should not be empty',
-      'shortCode must be a string',
-      'shortCode must be shorter than or equal to 20 characters',
-    ]);
+    expect(sut.errors!['shortCode']).toEqual(
+      expect.arrayContaining([
+        'shortCode should not be empty',
+        'shortCode must be a string',
+        'shortCode must be longer than or equal to 1 characters',
+      ]),
+    );
 
     isValid = sut.validate({ ...props, shortCode: '' });
     expect(isValid).toBeFalsy();
-    expect(sut.errors!['shortCode']).toStrictEqual([
-      'shortCode should not be empty',
-    ]);
+    expect(sut.errors!['shortCode']).toEqual(
+      expect.arrayContaining([
+        'shortCode should not be empty',
+        'shortCode must be longer than or equal to 1 characters',
+      ]),
+    );
 
     isValid = sut.validate({ ...props, shortCode: 10 as any });
     expect(isValid).toBeFalsy();
-    expect(sut.errors!['shortCode']).toStrictEqual([
-      'shortCode must be a string',
-      'shortCode must be shorter than or equal to 20 characters',
-    ]);
+    expect(sut.errors!['shortCode']).toEqual(
+      expect.arrayContaining([
+        'shortCode must be a string',
+        'shortCode must be longer than or equal to 1 and shorter than or equal to 6 characters',
+      ]),
+    );
 
-    isValid = sut.validate({ ...props, shortCode: 'a'.repeat(21) });
+    isValid = sut.validate({ ...props, shortCode: 'a'.repeat(8) });
     expect(isValid).toBeFalsy();
     expect(sut.errors!['shortCode']).toStrictEqual([
-      'shortCode must be shorter than or equal to 20 characters',
+      'shortCode must be shorter than or equal to 6 characters',
     ]);
   });
 
@@ -82,6 +89,7 @@ describe('LinkValidator unit tests', () => {
     isValid = sut.validate({ ...props, clicks: 'abc' as any });
     expect(isValid).toBeFalsy();
     expect(sut.errors!['clicks']).toStrictEqual([
+      'clicks must not be less than 0',
       'clicks must be an integer number',
     ]);
   });

@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import { Test, TestingModule } from '@nestjs/testing';
+import { randomUUID } from 'crypto';
 import { setupPrismaTests } from '@/shared/infrastructure/database/prisma/testing/setup-prisma-tests';
 import { DatabaseModule } from '@/shared/infrastructure/database/database.module';
 import { NotFoundError } from '@/shared/domain/errors/not-found-error';
 import { LinkEntity } from '@/links/domain/entities/link.entity';
 import { LinkPrismaRepository } from '../../link-prisma.repository';
-import { LinkRepository } from '@/links/domain/repositories/link.repository';
 import { LinkDataBuilder } from '@/links/domain/testing/helpers/link-data-builder';
 
 describe('LinkPrismaRepository integration tests', () => {
@@ -25,22 +25,46 @@ describe('LinkPrismaRepository integration tests', () => {
     await prismaService.link.deleteMany();
   });
 
+  afterAll(async () => {
+    await prismaService.$disconnect();
+  });
+
   it('should throw error when entity is not found (findById)', async () => {
-    await expect(() => sut.findById('FakeId')).rejects.toThrow(
-      new NotFoundError('LinkModel not found using ID FakeId'),
+    const id = randomUUID();
+    await expect(() => sut.findById(id)).rejects.toThrow(
+      new NotFoundError(`LinkModel not found using ID ${id}`),
     );
   });
 
   it('should find a entity by id', async () => {
-    const entity = new LinkEntity(LinkDataBuilder({}));
+    const user = await prismaService.user.create({
+      data: {
+        id: randomUUID(),
+        name: 'Test User',
+        email: `${randomUUID()}@mail.com`,
+        password: '123456',
+      },
+    });
+
+    const entity = new LinkEntity(LinkDataBuilder({ ownerId: user.id }));
     await prismaService.link.create({ data: entity.toJSON() });
 
     const output = await sut.findById(entity._id);
 
     expect(output.toJSON()).toStrictEqual(entity.toJSON());
   });
-  it('should find a entity by id', async () => {
-    const entity = new LinkEntity(LinkDataBuilder({}));
+
+  it('should find a entity by alias', async () => {
+    const user = await prismaService.user.create({
+      data: {
+        id: randomUUID(),
+        name: 'Test User',
+        email: `${randomUUID()}@mail.com`,
+        password: '123456',
+      },
+    });
+
+    const entity = new LinkEntity(LinkDataBuilder({ ownerId: user.id }));
     await prismaService.link.create({ data: entity.toJSON() });
 
     const output = await sut.findByAlias(entity.shortCode);
@@ -49,7 +73,16 @@ describe('LinkPrismaRepository integration tests', () => {
   });
 
   it('should insert a new entity', async () => {
-    const entity = new LinkEntity(LinkDataBuilder({}));
+    const user = await prismaService.user.create({
+      data: {
+        id: randomUUID(),
+        name: 'Test User',
+        email: `${randomUUID()}@mail.com`,
+        password: '123456',
+      },
+    });
+
+    const entity = new LinkEntity(LinkDataBuilder({ ownerId: user.id }));
     await sut.insert(entity);
 
     const created = await prismaService.link.findUnique({
@@ -60,7 +93,16 @@ describe('LinkPrismaRepository integration tests', () => {
   });
 
   it('should return all links', async () => {
-    const entity = new LinkEntity(LinkDataBuilder({}));
+    const user = await prismaService.user.create({
+      data: {
+        id: randomUUID(),
+        name: 'Test User',
+        email: `${randomUUID()}@mail.com`,
+        password: '123456',
+      },
+    });
+
+    const entity = new LinkEntity(LinkDataBuilder({ ownerId: user.id }));
     await prismaService.link.create({ data: entity.toJSON() });
 
     const links = await sut.findAll();
@@ -70,7 +112,16 @@ describe('LinkPrismaRepository integration tests', () => {
   });
 
   it('should throw error on update if entity not found', async () => {
-    const entity = new LinkEntity(LinkDataBuilder({}));
+    const user = await prismaService.user.create({
+      data: {
+        id: randomUUID(),
+        name: 'Test User',
+        email: `${randomUUID()}@mail.com`,
+        password: '123456',
+      },
+    });
+
+    const entity = new LinkEntity(LinkDataBuilder({ ownerId: user.id }));
 
     await expect(() => sut.update(entity)).rejects.toThrow(
       new NotFoundError(`LinkModel not found using ID ${entity._id}`),
@@ -78,7 +129,16 @@ describe('LinkPrismaRepository integration tests', () => {
   });
 
   it('should update an entity', async () => {
-    const entity = new LinkEntity(LinkDataBuilder({}));
+    const user = await prismaService.user.create({
+      data: {
+        id: randomUUID(),
+        name: 'Test User',
+        email: `${randomUUID()}@mail.com`,
+        password: '123456',
+      },
+    });
+
+    const entity = new LinkEntity(LinkDataBuilder({ ownerId: user.id }));
     await prismaService.link.create({ data: entity.toJSON() });
 
     entity.updateOriginalUrl('https://updated-url.com');
@@ -92,13 +152,31 @@ describe('LinkPrismaRepository integration tests', () => {
   });
 
   it('should throw error on delete when entity not found', async () => {
-    await expect(() => sut.delete('FakeId')).rejects.toThrow(
-      new NotFoundError('LinkModel not found using ID FakeId'),
+    const user = await prismaService.user.create({
+      data: {
+        id: randomUUID(),
+        name: 'Test User',
+        email: `${randomUUID()}@mail.com`,
+        password: '123456',
+      },
+    });
+
+    await expect(() => sut.delete(user.id)).rejects.toThrow(
+      new NotFoundError(`LinkModel not found using ID ${user.id}`),
     );
   });
 
   it('should soft delete entity', async () => {
-    const entity = new LinkEntity(LinkDataBuilder({}));
+    const user = await prismaService.user.create({
+      data: {
+        id: randomUUID(),
+        name: 'Test User',
+        email: `${randomUUID()}@mail.com`,
+        password: '123456',
+      },
+    });
+
+    const entity = new LinkEntity(LinkDataBuilder({ ownerId: user.id }));
     await prismaService.link.create({ data: entity.toJSON() });
 
     await sut.delete(entity._id);
@@ -117,7 +195,21 @@ describe('LinkPrismaRepository integration tests', () => {
   });
 
   it('should find entity by shortCode', async () => {
-    const entity = new LinkEntity(LinkDataBuilder({ shortCode: 'abc123' }));
+    const user = await prismaService.user.create({
+      data: {
+        id: randomUUID(),
+        name: 'Test User',
+        email: `${randomUUID()}@mail.com`,
+        password: '123456',
+      },
+    });
+
+    const entity = new LinkEntity(
+      LinkDataBuilder({
+        ownerId: user.id,
+        shortCode: 'abc123',
+      }),
+    );
     await prismaService.link.create({ data: entity.toJSON() });
 
     const result = await sut.findByShortCode('abc123');
@@ -126,93 +218,66 @@ describe('LinkPrismaRepository integration tests', () => {
   });
 
   it('should validate existsShortCode', async () => {
-    const entity = new LinkEntity(LinkDataBuilder({ shortCode: 'exists1' }));
+    const user = await prismaService.user.create({
+      data: {
+        id: randomUUID(),
+        name: 'Test User',
+        email: `${randomUUID()}@mail.com`,
+        password: '123456',
+      },
+    });
+
+    const entity = new LinkEntity(
+      LinkDataBuilder({
+        ownerId: user.id,
+        shortCode: 'exist1',
+      }),
+    );
     await prismaService.link.create({ data: entity.toJSON() });
 
-    expect(await sut.existsShortCode('exists1')).toBe(true);
+    expect(await sut.existsShortCode('exist1')).toBe(true);
     expect(await sut.existsShortCode('nope')).toBe(false);
   });
 
   it('should find all links by ownerId', async () => {
-    const link1 = new LinkEntity(LinkDataBuilder({ ownerId: 'user1' }));
-    const link2 = new LinkEntity(LinkDataBuilder({ ownerId: 'user1' }));
-    const link3 = new LinkEntity(LinkDataBuilder({ ownerId: 'user2' }));
+    const user = await prismaService.user.create({
+      data: {
+        id: randomUUID(),
+        name: 'Test User',
+        email: `${randomUUID()}@mail.com`,
+        password: '123456',
+      },
+    });
+
+    const user2 = await prismaService.user.create({
+      data: {
+        id: randomUUID(),
+        name: 'Test User 2',
+        email: `${randomUUID()}@mail.com`,
+        password: '1234567',
+      },
+    });
+
+    const owner1 = user.id;
+    const owner2 = user2.id;
+
+    const link1 = new LinkEntity(
+      LinkDataBuilder({ shortCode: 'codee1', ownerId: owner1 }),
+    );
+    const link2 = new LinkEntity(
+      LinkDataBuilder({ shortCode: 'codee2', ownerId: owner1 }),
+    );
+    const link3 = new LinkEntity(
+      LinkDataBuilder({ shortCode: 'codee3', ownerId: owner2 }),
+    );
 
     await prismaService.link.createMany({
       data: [link1.toJSON(), link2.toJSON(), link3.toJSON()],
     });
 
-    const results = await sut.findAllByOwner('user1');
+    const results = await sut.findAllByOwner(owner1);
 
     expect(results.length).toBe(2);
-    expect(results[0].ownerId).toBe('user1');
-    expect(results[1].ownerId).toBe('user1');
-  });
-
-  describe('search method', () => {
-    it('should paginate results when no filter/sort provided', async () => {
-      const createdAt = new Date();
-      const entities: LinkEntity[] = [];
-
-      for (let i = 0; i < 16; i++) {
-        entities.push(
-          new LinkEntity(
-            LinkDataBuilder({
-              originalUrl: `https://url${i}.com`,
-              createdAt: new Date(createdAt.getTime() + i),
-            }),
-          ),
-        );
-      }
-
-      await prismaService.link.createMany({
-        data: entities.map(e => e.toJSON()),
-      });
-
-      const output = await sut.search(new LinkRepository.SearchParams());
-
-      expect(output.total).toBe(16);
-      expect(output.items.length).toBe(15);
-      output.items.forEach(item => expect(item).toBeInstanceOf(LinkEntity));
-    });
-
-    it('should filter, sort and paginate results', async () => {
-      const base = new Date();
-      const entities = [
-        new LinkEntity(
-          LinkDataBuilder({ originalUrl: 'AAA', createdAt: base }),
-        ),
-        new LinkEntity(
-          LinkDataBuilder({
-            originalUrl: 'BBB',
-            createdAt: new Date(base.getTime() + 1),
-          }),
-        ),
-        new LinkEntity(
-          LinkDataBuilder({
-            originalUrl: 'AAA-test',
-            createdAt: new Date(base.getTime() + 2),
-          }),
-        ),
-      ];
-
-      await prismaService.link.createMany({
-        data: entities.map(e => e.toJSON()),
-      });
-
-      const output = await sut.search(
-        new LinkRepository.SearchParams({
-          filter: 'AAA',
-          sort: 'originalUrl',
-          sortDir: 'asc',
-          page: 1,
-          perPage: 2,
-        }),
-      );
-
-      expect(output.items.length).toBe(2);
-      expect(output.items[0].originalUrl).toContain('AAA');
-      expect(output.items[1].originalUrl).toContain('AAA');
-    });
+    results.forEach(r => expect(r.ownerId).toBe(owner1));
   });
 });

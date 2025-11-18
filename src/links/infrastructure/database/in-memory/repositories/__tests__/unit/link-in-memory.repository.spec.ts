@@ -44,61 +44,6 @@ describe('LinkInMemoryRepository unit tests', () => {
     expect(await sut.existsShortCode('fake')).toBe(false);
   });
 
-  it('Should not filter items when filter param is null', async () => {
-    const entity = makeEntity();
-    await sut.insert(entity);
-
-    const items = await sut.findAll();
-    const spy = jest.spyOn(items, 'filter');
-
-    const filtered = await sut['applyFilter'](items, null);
-
-    expect(spy).not.toHaveBeenCalled();
-    expect(filtered).toStrictEqual(items);
-  });
-
-  it('Should filter by originalUrl - applyFilter', async () => {
-    const items = [
-      makeEntity({ originalUrl: 'https://google.com' }),
-      makeEntity({ originalUrl: 'https://GOOGLE.com' }),
-      makeEntity({ originalUrl: 'https://fake.com' }),
-    ];
-
-    const spy = jest.spyOn(items, 'filter');
-    const filtered = await sut['applyFilter'](items, 'google');
-
-    expect(spy).toHaveBeenCalled();
-    expect(filtered).toStrictEqual([items[0], items[1]]);
-  });
-
-  it('Should sort by createdAt when sort param is null', async () => {
-    const createdAt = new Date();
-
-    const items = [
-      makeEntity({ createdAt: createdAt }),
-      makeEntity({ createdAt: new Date(createdAt.getTime() + 1) }),
-      makeEntity({ createdAt: new Date(createdAt.getTime() + 2) }),
-    ];
-
-    const sorted = await sut['applySort'](items, null, null);
-
-    expect(sorted).toStrictEqual([items[2], items[1], items[0]]);
-  });
-
-  it('Should sort by clicks field', async () => {
-    const items = [
-      makeEntity({ clicks: 10 }),
-      makeEntity({ clicks: 30 }),
-      makeEntity({ clicks: 20 }),
-    ];
-
-    let sorted = await sut['applySort'](items, 'clicks', 'asc');
-    expect(sorted).toStrictEqual([items[0], items[2], items[1]]);
-
-    sorted = await sut['applySort'](items, 'clicks', 'desc');
-    expect(sorted).toStrictEqual([items[1], items[2], items[0]]);
-  });
-
   it('Should insert and findById an entity', async () => {
     const entity = makeEntity();
     await sut.insert(entity);

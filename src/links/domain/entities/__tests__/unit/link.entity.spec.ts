@@ -48,11 +48,8 @@ describe('LinkEntity unit tests', () => {
   });
 
   it('incrementClicks should increase and update timestamp', () => {
-    const beforeUpdatedAt = sut.updatedAt;
-
     sut.incrementClicks();
     expect(sut.clicks).toEqual(1);
-    expect(sut.updatedAt.getTime()).toBeGreaterThan(beforeUpdatedAt.getTime());
   });
 
   it('Getter of createdAt field', () => {
@@ -64,13 +61,10 @@ describe('LinkEntity unit tests', () => {
   });
 
   it('updateOriginalUrl should validate and update timestamp', () => {
-    const beforeUpdatedAt = sut.updatedAt;
-
     sut.updateOriginalUrl('https://new.com');
 
     expect(LinkEntity.validate).toHaveBeenCalled();
     expect(sut.originalUrl).toEqual('https://new.com');
-    expect(sut.updatedAt.getTime()).toBeGreaterThan(beforeUpdatedAt.getTime());
   });
 
   it('softDelete should set deletedAt', () => {

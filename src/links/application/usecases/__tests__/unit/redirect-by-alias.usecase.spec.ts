@@ -1,8 +1,8 @@
-import { BadRequestError } from '@/shared/application/errors/bad-request-error';
 import { LinkRepository } from '@/links/domain/repositories/link.repository';
 import { RedirectByAliasUseCase } from '../../redirect-by-alias.usecase';
 import { LinkEntity } from '@/links/domain/entities/link.entity';
 import { LinkOutputMapper } from '@/links/application/dtos/link-output';
+import { NotFoundException } from '@nestjs/common';
 
 describe('RedirectByAliasUseCase', () => {
   let useCase: RedirectByAliasUseCase.UseCase;
@@ -48,7 +48,7 @@ describe('RedirectByAliasUseCase', () => {
     repository.findByAlias.mockResolvedValue(null);
 
     await expect(useCase.execute({ alias: 'notfound' })).rejects.toThrow(
-      new BadRequestError('Short URL not found'),
+      new NotFoundException('Short URL not found'),
     );
   });
 
@@ -58,7 +58,7 @@ describe('RedirectByAliasUseCase', () => {
     repository.findByAlias.mockResolvedValue(deletedLink);
 
     await expect(useCase.execute({ alias: 'abc123' })).rejects.toThrow(
-      new BadRequestError('Short URL not found'),
+      new NotFoundException('Short URL not found'),
     );
   });
 });

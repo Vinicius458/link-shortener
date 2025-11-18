@@ -3,15 +3,23 @@ import { LinkModelMapper } from '../../link-model.mapper';
 import { ValidationError } from '@/shared/domain/errors/validation-error';
 import { LinkEntity } from '@/links/domain/entities/link.entity';
 import { setupPrismaTests } from '@/shared/infrastructure/database/prisma/testing/setup-prisma-tests';
+import { Test } from '@nestjs/testing';
+import { DatabaseModule } from '@/shared/infrastructure/database/database.module';
 
 describe('LinkModelMapper integration tests', () => {
   let prismaService: PrismaClient;
+  let module: any;
   let props: any;
 
   beforeAll(async () => {
     setupPrismaTests();
+
     prismaService = new PrismaClient();
     await prismaService.$connect();
+
+    module = await Test.createTestingModule({
+      imports: [DatabaseModule.forTest(prismaService)],
+    }).compile();
   });
 
   beforeEach(async () => {

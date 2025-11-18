@@ -9,11 +9,11 @@ export class ShortenUrlDto implements ShortenUrlUseCase.Input {
   @IsUrl()
   url: string;
 
-  @ApiProperty({
-    description: 'ID do usuário dono do link (opcional)',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  ownerId?: string;
+  // @ApiProperty({
+  //   description: 'ID do usuário dono do link (opcional)',
+  //   required: false,
+  // })
+  // @IsString()
+  // @IsOptional()
+  // ownerId?: string;
 }

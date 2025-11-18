@@ -1,8 +1,8 @@
-version: '3.1'
+version: '3.9'
 
 services:
   db:
-    build: .
+    image: postgres:15-alpine
     container_name: api-db
     restart: always
     tty: true
@@ -11,5 +11,10 @@ services:
     volumes:
       - .docker/dbdata:/var/lib/postgresql/data
     environment:
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=docker
-      - POSTGRES_DB=projectdb
+      - POSTGRES_DB=link_shortener
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+      interval: 5s
+      retries: 5

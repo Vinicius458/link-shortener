@@ -2,6 +2,7 @@ import { LinkRepository } from '@/links/domain/repositories/link.repository';
 import { UseCase as DefaultUseCase } from '@/shared/application/usecases/use-case';
 import { BadRequestError } from '@/shared/application/errors/bad-request-error';
 import { LinkOutput, LinkOutputMapper } from '../dtos/link-output';
+import { NotFoundException } from '@nestjs/common';
 
 export namespace RedirectByAliasUseCase {
   export type Input = {
@@ -20,7 +21,7 @@ export namespace RedirectByAliasUseCase {
       const shortUrl = await this.shortUrlRepository.findByAlias(input.alias);
 
       if (!shortUrl || shortUrl.deletedAt) {
-        throw new BadRequestError('Short URL not found');
+        throw new NotFoundException('Short URL not found');
       }
 
       shortUrl.incrementClicks();

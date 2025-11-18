@@ -6,7 +6,9 @@ import { setupPrismaTests } from '@/shared/infrastructure/database/prisma/testin
 
 import { RedirectByAliasUseCase } from '../../redirect-by-alias.usecase';
 import { LinkPrismaRepository } from '@/links/infrastructure/database/prisma/repositories/link-prisma.repository';
-import { BadRequestError } from '@/shared/application/errors/bad-request-error';
+import { LinkEntity } from '@/links/domain/entities/link.entity';
+import { LinkDataBuilder } from '@/links/domain/testing/helpers/link-data-builder';
+import { NotFoundException } from '@nestjs/common';
 
 describe('RedirectByAliasUseCase Integration Tests', () => {
   const prisma = new PrismaClient();
@@ -33,48 +35,46 @@ describe('RedirectByAliasUseCase Integration Tests', () => {
     await module.close();
   });
 
-  it('should throw BadRequestError when alias does not exist', async () => {
+  it('should throw NotFoundException when alias does not exist', async () => {
     await expect(() =>
       sut.execute({ alias: 'unknown-alias' }),
-    ).rejects.toBeInstanceOf(BadRequestError);
+    ).rejects.toBeInstanceOf(NotFoundException);
+    3;
   });
 
-  it('should throw BadRequestError when link is soft-deleted', async () => {
-    await prisma.link.create({
-      data: {
-        id: 'link1',
-        shortCode: 'abc',
-        originalUrl: 'https://test.com',
-        ownerId: null,
-        clicks: 0,
-        deletedAt: new Date(),
-      },
+  it('should throw NotFoundException when link is soft-deleted', async () => {
+    const entity = new LinkEntity({
+      ...LinkDataBuilder({ shortCode: 'abc' }),
+      ownerId: null,
     });
+    entity.softDelete();
+    await prisma.link.create({ data: entity.toJSON() });
 
     await expect(() => sut.execute({ alias: 'abc' })).rejects.toBeInstanceOf(
-      BadRequestError,
+      NotFoundException,
     );
   });
 
   it('should redirect successfully and increment clicks', async () => {
-    await prisma.link.create({
-      data: {
-        id: 'link2',
-        shortCode: 'myalias',
+    const entity = new LinkEntity({
+      ...LinkDataBuilder({
+        shortCode: 'alias',
         originalUrl: 'https://google.com',
         ownerId: null,
         clicks: 5,
         deletedAt: null,
-      },
+      }),
+      ownerId: null,
     });
+    const linkCreated = await prisma.link.create({ data: entity.toJSON() });
 
-    const output = await sut.execute({ alias: 'myalias' });
+    const output = await sut.execute({ alias: 'alias' });
 
     expect(output.originalUrl).toBe('https://google.com');
-    expect(output.shortCode).toBe('myalias');
+    expect(output.shortCode).toBe('alias');
 
     const updated = await prisma.link.findUnique({
-      where: { id: 'link2' },
+      where: { id: linkCreated.id },
     });
 
     expect(updated?.clicks).toBe(6);

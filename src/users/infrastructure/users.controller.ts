@@ -20,15 +20,10 @@ import { UpdateUserUseCase } from '../application/usecases/update-user.usecase';
 import { UpdatePasswordUseCase } from '../application/usecases/update-password.usecase';
 import { DeleteUserUseCase } from '../application/usecases/delete-user.usecase';
 import { GetUserUseCase } from '../application/usecases/getuser.usecase';
-import { ListUsersUseCase } from '../application/usecases/listusers.usecase';
 import { SigninDto } from './dtos/signin.dto';
-import { ListUsersDto } from './dtos/list-users.dto';
 import { UpdatePasswordDto } from './dtos/update-password.dto';
 import { UserOutput } from '../application/dtos/user-output';
-import {
-  UserCollectionPresenter,
-  UserPresenter,
-} from './presenters/user.presenter';
+import { UserPresenter } from './presenters/user.presenter';
 import { AuthService } from '@/auth/infrastructure/auth.service';
 import { AuthGuard } from '@/auth/infrastructure/auth.guard';
 import {
@@ -59,18 +54,11 @@ export class UsersController {
   @Inject(GetUserUseCase.UseCase)
   private getUserUseCase: GetUserUseCase.UseCase;
 
-  @Inject(ListUsersUseCase.UseCase)
-  private listUsersUseCase: ListUsersUseCase.UseCase;
-
   @Inject(AuthService)
   private authService: AuthService;
 
   static userToResponse(output: UserOutput) {
     return new UserPresenter(output);
-  }
-
-  static listUsersToResponse(output: ListUsersUseCase.Output) {
-    return new UserCollectionPresenter(output);
   }
 
   @ApiResponse({
@@ -115,51 +103,6 @@ export class UsersController {
   async login(@Body() signinDto: SigninDto) {
     const output = await this.signinUseCase.execute(signinDto);
     return this.authService.generateJwt(output.id);
-  }
-
-  @ApiBearerAuth()
-  @ApiResponse({
-    status: 200,
-    schema: {
-      type: 'object',
-      properties: {
-        meta: {
-          type: 'object',
-          properties: {
-            total: {
-              type: 'number',
-            },
-            currentPage: {
-              type: 'number',
-            },
-            lastPage: {
-              type: 'number',
-            },
-            perPage: {
-              type: 'number',
-            },
-          },
-        },
-        data: {
-          type: 'array',
-          items: { $ref: getSchemaPath(UserPresenter) },
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 422,
-    description: 'Parâmetros de consulta inválidos',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Acesso não autorizado',
-  })
-  @UseGuards(AuthGuard)
-  @Get()
-  async search(@Query() searchParams: ListUsersDto) {
-    const output = await this.listUsersUseCase.execute(searchParams);
-    return UsersController.listUsersToResponse(output);
   }
 
   @ApiBearerAuth()
