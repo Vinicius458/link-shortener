@@ -16,12 +16,3 @@ export function setupPrismaTests() {
     { stdio: 'inherit' },
   );
 }
-
-// export function setupPrismaTests() {
-//   // execSync(
-//   //   'npx dotenv-cli -e .env.test -- npx prisma migrate deploy --schema .src/shared/infrastructure/database/prisma/schema.prisma',
-//   // );
-//   execSync(
-//     'npx dotenv-cli -e ../../../../../.env.test -- npx prisma migrate deploy --schema ../../../../../src/shared/infrastructure/database/prisma/schema.prisma',
-//   );
-// }

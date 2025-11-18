@@ -15,21 +15,4 @@ import { join } from 'node:path';
   providers: [EnvConfigService],
   exports: [EnvConfigService],
 })
-export class EnvConfigModule {
-  // static forRoot(options: ConfigModuleOptions = {}): DynamicModule {
-  //   return {
-  //     module: EnvConfigModule,
-  //     imports: [
-  //       ConfigModule.forRoot({
-  //         ...options,
-  //         isGlobal: true,
-  //         envFilePath: [
-  //           join(__dirname, `../../../../.env.${process.env.NODE_ENV}`),
-  //         ],
-  //       }),
-  //     ],
-  //     providers: [EnvConfigService],
-  //     exports: [EnvConfigService],
-  //   };
-  // }
-}
+export class EnvConfigModule {}
