@@ -95,7 +95,6 @@ describe('LinksController e2e tests - update URL', () => {
     });
 
     it('should return 409 when trying to update a URL owned by another user', async () => {
-      // Usuário 1
       await request(app.getHttpServer()).post('/users').send(signupDto);
 
       const resSign1 = await request(app.getHttpServer())
@@ -105,7 +104,6 @@ describe('LinksController e2e tests - update URL', () => {
       const token1 = resSign1.body.accessToken;
       const jwt1 = await auth.verifyJwt(token1);
 
-      // Cria URL para o usuário 1
       const urlUser1 = new LinkEntity(
         LinkDataBuilder({
           ownerId: jwt1.id,
@@ -116,7 +114,6 @@ describe('LinksController e2e tests - update URL', () => {
 
       await repository.insert(urlUser1);
 
-      // Usuário 2
       await request(app.getHttpServer()).post('/users').send({
         name: 'User 2',
         email: 'user2@test.com',
@@ -132,7 +129,6 @@ describe('LinksController e2e tests - update URL', () => {
 
       const token2 = resSign2.body.accessToken;
 
-      // Usuário 2 tenta alterar URL do usuário 1
       await request(app.getHttpServer())
         .patch(`/urls/${urlUser1.id}`)
         .set('Authorization', `Bearer ${token2}`)
@@ -141,7 +137,6 @@ describe('LinksController e2e tests - update URL', () => {
     });
 
     it('should update URL successfully (200)', async () => {
-      // Cria usuário
       await request(app.getHttpServer()).post('/users').send(signupDto);
 
       const resSign = await request(app.getHttpServer())
@@ -151,7 +146,6 @@ describe('LinksController e2e tests - update URL', () => {
       const token = resSign.body.accessToken;
       const jwt = await auth.verifyJwt(token);
 
-      // Cria URL no repositório
       const originalEntity = new LinkEntity(
         LinkDataBuilder({
           ownerId: jwt.id,
@@ -162,14 +156,12 @@ describe('LinksController e2e tests - update URL', () => {
 
       await repository.insert(originalEntity);
 
-      // Atualiza
       const res = await request(app.getHttpServer())
         .patch(`/urls/${originalEntity.id}`)
         .set('Authorization', `Bearer ${token}`)
         .send({ newOriginalUrl: 'https://updated.com' })
         .expect(200);
 
-      // Consulta banco
       const dbLink = await prisma.link.findUnique({
         where: { id: originalEntity.id },
       });

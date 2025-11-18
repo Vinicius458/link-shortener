@@ -69,32 +69,6 @@ describe('LinksController e2e tests - redirect url', () => {
     shortenDto = {
       url: 'https://google.com',
     };
-    // await request(app.getHttpServer()).post('/users').send(signupDto);
-
-    // const res_sign = await request(app.getHttpServer())
-    //   .post('/users/login')
-    //   .send(signinDto)
-    //   .expect(200);
-
-    // const token = res_sign.body.accessToken;
-
-    // const jwt = await auth.verifyJwt(token);
-
-    // await request(app.getHttpServer())
-    // .post('/urls')
-    // .set('Authorization', `Bearer ${token}`)
-    // .send(shortenDto);
-    // .expect(201);
-
-    // const linkResult = await prisma.link.findFirst({
-    //   where: { originalUrl: shortenDto.url, ownerId: null },
-    // });
-
-    // const link = LinkModelMapper.toEntity(linkResult);
-    // const presenter = new ShortenUrlPresenter(link.toJSON());
-    // const serialized = instanceToPlain(presenter);
-
-    // expect(res.body.data).toStrictEqual(serialized);
   });
 
   afterAll(async () => {

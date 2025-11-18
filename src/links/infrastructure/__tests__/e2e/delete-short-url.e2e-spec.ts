@@ -63,10 +63,6 @@ describe('LinksController e2e tests - delete URL', () => {
     await prisma.$disconnect();
   });
 
-  // ---------------------------------------------------
-  // TESTES DO DELETE
-  // ---------------------------------------------------
-
   describe('DELETE /urls/:id', () => {
     it('should return 401 when no token is sent', async () => {
       await request(app.getHttpServer()).delete('/urls/any-id').expect(401);
@@ -88,7 +84,6 @@ describe('LinksController e2e tests - delete URL', () => {
     });
 
     it('should return 409 when trying to delete a URL owned by another user', async () => {
-      // Usuário 1
       await request(app.getHttpServer()).post('/users').send(signupDto);
 
       const resSign1 = await request(app.getHttpServer())
@@ -98,7 +93,6 @@ describe('LinksController e2e tests - delete URL', () => {
       const token1 = resSign1.body.accessToken;
       const jwt1 = await auth.verifyJwt(token1);
 
-      // Cria URL para o usuário 1
       const urlUser1 = new LinkEntity(
         LinkDataBuilder({
           ownerId: jwt1.id,
@@ -109,7 +103,6 @@ describe('LinksController e2e tests - delete URL', () => {
 
       await repository.insert(urlUser1);
 
-      // Usuário 2
       await request(app.getHttpServer()).post('/users').send({
         name: 'User 2',
         email: 'user2@test.com',
@@ -125,7 +118,6 @@ describe('LinksController e2e tests - delete URL', () => {
 
       const token2 = resSign2.body.accessToken;
 
-      // Usuário 2 tenta deletar URL do usuário 1
       await request(app.getHttpServer())
         .delete(`/urls/${urlUser1.id}`)
         .set('Authorization', `Bearer ${token2}`)
@@ -133,7 +125,6 @@ describe('LinksController e2e tests - delete URL', () => {
     });
 
     it('should delete URL successfully (204)', async () => {
-      // Cria usuário
       await request(app.getHttpServer()).post('/users').send(signupDto);
 
       const resSign = await request(app.getHttpServer())
@@ -143,7 +134,6 @@ describe('LinksController e2e tests - delete URL', () => {
       const token = resSign.body.accessToken;
       const jwt = await auth.verifyJwt(token);
 
-      // Cria URL no repositório
       const entity = new LinkEntity(
         LinkDataBuilder({
           ownerId: jwt.id,
@@ -154,7 +144,6 @@ describe('LinksController e2e tests - delete URL', () => {
 
       await repository.insert(entity);
 
-      // Remove
       await request(app.getHttpServer())
         .delete(`/urls/${entity.id}`)
         .set('Authorization', `Bearer ${token}`)

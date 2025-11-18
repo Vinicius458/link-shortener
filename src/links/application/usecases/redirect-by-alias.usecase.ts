@@ -7,9 +7,6 @@ import { NotFoundException } from '@nestjs/common';
 export namespace RedirectByAliasUseCase {
   export type Input = {
     alias: string;
-    // ip?: string | null;
-    // userAgent?: string | null;
-    // referrer?: string | null;
   };
 
   export type Output = LinkOutput;

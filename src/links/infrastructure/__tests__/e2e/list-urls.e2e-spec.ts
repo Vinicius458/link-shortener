@@ -95,7 +95,6 @@ describe('LinksController e2e tests - list URLs', () => {
     });
 
     it('should list all URLs from authenticated user', async () => {
-      // Cria usuário
       await request(app.getHttpServer())
         .post('/users')
         .send(signupDto)
@@ -109,7 +108,6 @@ describe('LinksController e2e tests - list URLs', () => {
       const token = resSign.body.accessToken;
       const jwt = await auth.verifyJwt(token);
 
-      // Cria URLs no repositório
       const link1 = new LinkEntity(
         LinkDataBuilder({
           ownerId: jwt.id,
@@ -129,12 +127,10 @@ describe('LinksController e2e tests - list URLs', () => {
       await repository.insert(link1);
       await repository.insert(link2);
 
-      // Faz a requisição
       const res = await request(app.getHttpServer())
         .get('/urls')
         .set('Authorization', `Bearer ${token}`)
         .expect(200);
-      // Busca entidades reais no banco
       const dbLinks = await prisma.link.findMany({
         where: { ownerId: jwt.id },
       });

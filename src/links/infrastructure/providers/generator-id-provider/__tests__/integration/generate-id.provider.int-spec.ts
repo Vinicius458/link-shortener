@@ -37,7 +37,6 @@ describe('GenerateIdProvider (Integration)', () => {
   it('should only contain valid base64url characters', async () => {
     const id = await provider.generateId(20);
 
-    // base64url: A-Z a-z 0-9 - _
     const regex = /^[A-Za-z0-9\-_]+$/;
 
     expect(regex.test(id)).toBeTruthy();

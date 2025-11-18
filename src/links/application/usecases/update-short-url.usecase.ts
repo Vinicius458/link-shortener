@@ -24,7 +24,6 @@ export namespace UpdateShortUrlDestinationUseCase {
         throw new NotFoundError(`Short URL with id ${input.id} not found`);
       }
 
-      // Garante que apenas o dono pode editar
       if (entity.ownerId !== input.userId) {
         throw new ConflictException(
           'You do not have permission to update this short URL',

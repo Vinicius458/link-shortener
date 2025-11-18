@@ -61,9 +61,6 @@ export class LinksController {
   @Inject(DeleteShortUrlUseCase.UseCase)
   private deleteShortUrlUseCase: DeleteShortUrlUseCase.UseCase;
 
-  // -----------------------------------------------------------
-  //  POST /api/shorten — encurta URL (auth opcional)
-  // -----------------------------------------------------------
   @ApiResponse({
     status: 201,
     schema: { $ref: getSchemaPath(ShortenUrlPresenter) },
@@ -85,9 +82,6 @@ export class LinksController {
     return new ShortenUrlPresenter(output);
   }
 
-  // -----------------------------------------------------------
-  //  GET /:alias — redireciona (público)
-  // -----------------------------------------------------------
   @ApiResponse({
     status: 302,
     description: 'Redireciona para a URL original',
@@ -103,9 +97,6 @@ export class LinksController {
     return res.redirect(output.originalUrl);
   }
 
-  // -----------------------------------------------------------
-  //  GET /api/urls — lista URLs do usuário autenticado
-  // -----------------------------------------------------------
   @ApiBearerAuth()
   @ApiResponse({
     status: 200,
@@ -131,9 +122,6 @@ export class LinksController {
     return out;
   }
 
-  // -----------------------------------------------------------
-  //  PATCH /api/urls/:id — atualizar URL (somente owner)
-  // -----------------------------------------------------------
   @ApiBearerAuth()
   @ApiResponse({
     status: 200,
@@ -161,9 +149,6 @@ export class LinksController {
     return new ShortUrlPresenter(output);
   }
 
-  // -----------------------------------------------------------
-  //  DELETE /api/urls/:id — soft delete
-  // -----------------------------------------------------------
   @ApiBearerAuth()
   @ApiResponse({ status: 204, description: 'Excluído com sucesso' })
   @ApiResponse({ status: 404, description: 'URL não encontrada' })
