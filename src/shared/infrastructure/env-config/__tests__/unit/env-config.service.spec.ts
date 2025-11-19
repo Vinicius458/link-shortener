@@ -23,11 +23,11 @@ describe('EnvConfigService unit tests', () => {
   });
 
   it('should return the variable NODE_ENV', () => {
-    expect(sut.getNodeEnv()).toBe('test');
+    expect(sut.getNodeEnv()).toBe('development');
   });
 
   it('should return the variable JWT_SECRET', () => {
-    expect(sut.getJwtSecret()).toBe('fake_secret');
+    expect(sut.getJwtSecret()).toBe('my_secret');
   });
 
   it('should return the variable JWT_EXPIRES_IN', () => {

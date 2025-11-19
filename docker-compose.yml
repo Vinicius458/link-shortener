@@ -2,19 +2,35 @@ version: '3.9'
 
 services:
   db:
-    image: postgres:15-alpine
-    container_name: api-db
+    image: postgres:15
+    container_name: linkshort_db
     restart: always
-    tty: true
-    ports:
-      - '5432:5432'
-    volumes:
-      - .docker/dbdata:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=docker
-      - POSTGRES_DB=link_shortener
-    healthcheck:
-      test: ['CMD', 'pg_isready', '-U', 'postgres']
-      interval: 5s
-      retries: 5
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: projectdb
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: linkshort_app
+    command: npm run start:dev
+    ports:
+      - '3000:3000'
+    environment:
+      PORT: 3000
+      NODE_ENV: development
+      DATABASE_URL: 'postgresql://postgres:docker@db:5432/projectdb?schema=public'
+      JWT_SECRET: my_secret
+      JWT_EXPIRES_IN: 86400
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
