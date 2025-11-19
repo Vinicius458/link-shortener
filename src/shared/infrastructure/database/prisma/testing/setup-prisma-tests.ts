@@ -9,10 +9,13 @@ export function setupPrismaTests() {
     'src/shared/infrastructure/database/prisma/schema.prisma',
   );
 
-  const envPath = path.join(root, '.env.test');
+  const isDocker = process.env.DOCKERIZED === 'true';
 
+  const envPath = isDocker
+    ? path.join(root, '.env.test')
+    : path.join(root, '.env.test.local');
   execSync(
-    `npx dotenv-cli -e ${envPath} -- npx prisma migrate deploy --schema ${schemaPath}`,
+    `npx dotenv-cli --override -e ${envPath} -- npx prisma migrate deploy --schema ${schemaPath}`,
     { stdio: 'inherit' },
   );
 }

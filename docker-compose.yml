@@ -24,8 +24,9 @@ services:
       PORT: 3000
       NODE_ENV: development
       DATABASE_URL: 'postgresql://postgres:docker@db:5432/projectdb?schema=public'
+      DOCKERIZED: 'true'
       JWT_SECRET: my_secret
-      JWT_EXPIRES_IN: 86400
+      JWT_EXPIRES_IN: 3600
     volumes:
       - .:/app
       - /app/node_modules
